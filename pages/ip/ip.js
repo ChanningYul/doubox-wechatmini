@@ -67,36 +67,18 @@ Page({
    * @param {string} text 输入文本
    */
   callIPAPI: function (text) {
-    API.generateIP(text)
-      .then((res) => {
-        this.setData({
-          results: res.data,
-          loading: false,
-          error: ''
-        });
+    // 注意：generateIP接口在新的API文档中暂未提供
+    // 暂时使用模拟数据
+    this.setData({
+      results: this.generateMockResults(text),
+      loading: false,
+      error: ''
+    });
 
-        wx.showToast({
-          title: 'IP复刻完成',
-          icon: 'success'
-        });
-      })
-      .catch((err) => {
-        console.error('IP复刻失败:', err);
-        
-        // 如果API调用失败，使用模拟数据作为降级方案
-        const mockResults = this.generateMockResults(text);
-        
-        this.setData({
-          results: mockResults,
-          loading: false,
-          error: ''
-        });
-
-        wx.showToast({
-          title: 'IP复刻完成（演示数据）',
-          icon: 'success'
-        });
-      });
+    wx.showToast({
+      title: 'IP复刻完成（模拟数据）',
+      icon: 'success'
+    });
   },
 
   /**

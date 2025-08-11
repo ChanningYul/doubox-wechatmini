@@ -5,8 +5,9 @@
 
 // API基础配置
 const API_CONFIG = {
-  baseUrl: 'http://localhost:8002/api', // API服务地址
+  baseUrl: 'https://a.starrysplendor.com', // doubox服务器API地址
   timeout: 10000, // 请求超时时间
+  apiKey: 'your_api_key_here', // API密钥，需要替换为真实的密钥
   header: {
     'Content-Type': 'application/json'
   }
@@ -28,7 +29,7 @@ const request = (options) => {
     }
 
     wx.request({
-      url: `${API_CONFIG.baseUrl}${options.url}`,
+      url: options.fullUrl || `${API_CONFIG.baseUrl}${options.url}`,
       method: options.method || 'GET',
       data: options.data || {},
       header: {
@@ -164,11 +165,10 @@ const API = {
    * @returns {Promise} 提取结果
    */
   extractText: (videoUrl) => {
-    return post('/extract/text', {
-      url: videoUrl
-    }, {
+    return post('', {}, {
       loadingText: '提取中...',
-      showLoading: true
+      showLoading: true,
+      fullUrl: `${API_CONFIG.baseUrl}/video2text?key=${API_CONFIG.apiKey}&url=${encodeURIComponent(videoUrl)}`
     });
   },
 
@@ -178,78 +178,53 @@ const API = {
    * @returns {Promise} 仿写结果
    */
   rewriteText: (originalText) => {
-    return post('/rewrite/text', {
-      text: originalText
-    }, {
+    return post('', {}, {
       loadingText: '仿写中...',
-      showLoading: true
+      showLoading: true,
+      fullUrl: `${API_CONFIG.baseUrl}/imitatetext?key=${API_CONFIG.apiKey}&text=${encodeURIComponent(originalText)}`
     });
   },
 
   /**
-   * 视频去水印接口
-   * @param {String} videoUrl 视频链接
+   * 视频去水印接口（获取真实视频URL）
+   * @param {String} videoUrl 视频分享链接
    * @returns {Promise} 处理结果
    */
   removeWatermark: (videoUrl) => {
-    return post('/watermark/remove', {
-      url: videoUrl
-    }, {
+    return post('', {}, {
       loadingText: '处理中...',
-      showLoading: true
+      showLoading: true,
+      fullUrl: `${API_CONFIG.baseUrl}/share2realurl?key=${API_CONFIG.apiKey}&share_text=${encodeURIComponent(videoUrl)}`
     });
   },
 
   /**
-   * 获取视频信息接口
-   * @param {String} videoUrl 视频链接
-   * @returns {Promise} 视频信息
+   * 查询剩余使用次数
+   * @returns {Promise} 剩余次数信息
    */
-  getVideoInfo: (videoUrl) => {
-    return post('/video/info', {
-      url: videoUrl
-    }, {
-      loadingText: '获取信息中...',
-      showLoading: true
-    });
-  },
-
-  /**
-   * 用户反馈接口
-   * @param {Object} feedback 反馈内容
-   * @returns {Promise} 提交结果
-   */
-  submitFeedback: (feedback) => {
-    return post('/feedback/submit', feedback, {
-      loadingText: '提交中...',
-      showLoading: true
-    });
-  },
-
-  /**
-   * IP复刻接口
-   * @param {String} inputText 输入的IP内容
-   * @returns {Promise} 复刻结果
-   */
-  generateIP: (inputText) => {
-    return post('/ip/generate', {
-      text: inputText
-    }, {
-      loadingText: '生成中...',
-      showLoading: true
-    });
-  },
-
-  /**
-   * 检查更新接口
-   * @returns {Promise} 更新信息
-   */
-  checkUpdate: () => {
-    return get('/app/check-update', {}, {
+  getRemainder: () => {
+    return get('', {
+      loadingText: '查询中...',
       showLoading: false,
-      showError: false
+      fullUrl: `${API_CONFIG.baseUrl}/getremainder?key=${API_CONFIG.apiKey}`
     });
-  }
+  },
+
+  /**
+   * 从真实视频URL提取文案
+   * @param {String} realVideoUrl 真实视频下载URL
+   * @returns {Promise} 提取结果
+   */
+  extractTextFromRealVideo: (realVideoUrl) => {
+    return post('', {}, {
+      loadingText: '提取中...',
+      showLoading: true,
+      fullUrl: `${API_CONFIG.baseUrl}/realvideo2text?key=${API_CONFIG.apiKey}&url=${encodeURIComponent(realVideoUrl)}`
+    });
+  },
+
+  // 注意：以下接口在新的API文档中暂未提供，如需使用请联系API提供方
+  // getVideoInfo, submitFeedback, generateIP, checkUpdate
 };
 
 module.exports = {
