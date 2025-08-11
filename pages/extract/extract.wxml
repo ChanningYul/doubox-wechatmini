@@ -1,0 +1,41 @@
+<!--文案提取页面结构-->
+<view class="container">  
+  <!-- 输入区域 -->
+  <view class="input-wrapper">
+    <textarea 
+      class="input" 
+      placeholder="请输入抖音视频分享链接..." 
+      placeholder-class="input-placeholder"
+      value="{{videoUrl}}"
+      bindinput="onInputChange"
+      maxlength="500"
+      auto-height
+    ></textarea>
+  </view>
+  
+  <!-- 提取按钮 -->
+  <button 
+    class="btn btn-primary" 
+    bindtap="extractText"
+    disabled="{{loading || isButtonDisabled}}"
+    loading="{{loading}}"
+  >
+    {{loading ? '提取中...' : '提取文案'}}
+  </button>
+  
+  <!-- 结果展示区域 -->
+  <view class="result-wrapper" wx:if="{{result}}">
+    <view class="result-title">提取结果：</view>
+    <view class="result-content">
+      <text class="result-text" user-select="true">{{result}}</text>
+    </view>
+    <view class="result-actions">
+      <button class="btn-copy" bindtap="copyResult">复制文案</button>
+    </view>
+  </view>
+  
+  <!-- 错误提示 -->
+  <view class="error-wrapper" wx:if="{{error}}">
+    <view class="error-text">{{error}}</view>
+  </view>
+</view>

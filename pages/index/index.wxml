@@ -1,0 +1,37 @@
+<!--首页页面结构-->
+<view class="container">
+  <!-- 工具网格 -->
+  <view class="tool-grid">
+    <!-- 视频去水印 -->
+    <view class="tool-item" bindtap="goToWatermark">
+      <view class="tool-icon">
+        <text class="icon-video">🎬</text>
+      </view>
+      <view class="tool-name">视频去水印</view>
+    </view>
+    
+    <!-- 文案提取 -->
+    <view class="tool-item" bindtap="goToExtract">
+      <view class="tool-icon">
+        <text class="icon-document">📄</text>
+      </view>
+      <view class="tool-name">文案提取</view>
+    </view>
+    
+    <!-- 文案仿写 -->
+    <view class="tool-item" bindtap="goToRewrite">
+      <view class="tool-icon">
+        <text class="icon-edit">📝</text>
+      </view>
+      <view class="tool-name">文案仿写</view>
+    </view>
+    
+    <!-- IP复刻 -->
+    <view class="tool-item" bindtap="goToIP">
+      <view class="tool-icon">
+        <text class="icon-copy">📋</text>
+      </view>
+      <view class="tool-name">IP复刻</view>
+    </view>
+  </view>
+</view>

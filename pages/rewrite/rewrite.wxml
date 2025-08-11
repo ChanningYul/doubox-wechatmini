@@ -1,0 +1,49 @@
+<!--文案仿写页面结构-->
+<view class="container">
+  <!-- 输入区域 -->
+  <view class="input-wrapper">
+    <textarea 
+      class="input" 
+      placeholder="请输入需要仿写的原文案内容..." 
+      placeholder-class="input-placeholder"
+      value="{{originalText}}"
+      bindinput="onInputChange"
+      maxlength="1000"
+      auto-height
+    ></textarea>
+  </view>
+  
+  <!-- 仿写按钮 -->
+  <button 
+    class="btn btn-primary" 
+    bindtap="rewriteText"
+    disabled="{{loading || isButtonDisabled}}"
+    loading="{{loading}}"
+  >
+    {{loading ? '仿写中...' : '开始仿写'}}
+  </button>
+  
+  <!-- 结果展示区域 -->
+  <view class="result-wrapper" wx:if="{{results.length > 0}}">
+    <view class="result-title">仿写结果：</view>
+    <view class="result-list">
+      <view 
+        class="result-item" 
+        wx:for="{{results}}" 
+        wx:key="index"
+      >
+        <view class="result-content">
+          <text class="result-text" user-select="true">{{item}}</text>
+        </view>
+        <view class="result-actions">
+          <button class="btn-copy" bindtap="copyResult" data-text="{{item}}">复制</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 错误提示 -->
+  <view class="error-wrapper" wx:if="{{error}}">
+    <view class="error-text">{{error}}</view>
+  </view>
+</view>

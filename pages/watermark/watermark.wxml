@@ -1,0 +1,77 @@
+<!--视频去水印页面结构-->
+<view class="container">  
+  <!-- 输入区域 -->
+  <view class="input-wrapper">
+    <textarea 
+      class="input" 
+      placeholder="请输入抖音视频分享链接..." 
+      placeholder-class="input-placeholder"
+      value="{{videoUrl}}"
+      bindinput="onInputChange"
+      maxlength="500"
+      auto-height
+    ></textarea>
+  </view>
+  
+  <!-- 去水印按钮 -->
+  <button 
+    class="btn btn-primary" 
+    bindtap="removeWatermark"
+    disabled="{{loading || isButtonDisabled}}"
+    loading="{{loading}}"
+  >
+    {{loading ? '处理中...' : '去水印'}}
+  </button>
+  
+  <!-- 结果展示区域 -->
+  <view class="result-wrapper" wx:if="{{result}}">
+    <view class="result-title">处理结果：</view>
+    
+    <!-- 视频信息 -->
+    <view class="video-info" wx:if="{{result.title}}">
+      <view class="info-item">
+        <text class="info-label">视频标题：</text>
+        <text class="info-value">{{result.title}}</text>
+      </view>
+      <view class="info-item" wx:if="{{result.author}}">
+        <text class="info-label">作者：</text>
+        <text class="info-value">{{result.author}}</text>
+      </view>
+      <view class="info-item" wx:if="{{result.duration}}">
+        <text class="info-label">时长：</text>
+        <text class="info-value">{{result.duration}}</text>
+      </view>
+    </view>
+    
+    <!-- 下载链接 -->
+    <view class="download-section" wx:if="{{result.downloadUrl}}">
+      <view class="download-title">无水印视频：</view>
+      <view class="download-actions">
+        <button class="btn-download" bindtap="downloadVideo">下载视频</button>
+        <button class="btn-copy" bindtap="copyDownloadUrl">复制链接</button>
+      </view>
+    </view>
+    
+    <!-- 预览图 -->
+    <view class="preview-section" wx:if="{{result.cover}}">
+      <view class="preview-title">视频封面：</view>
+      <image class="preview-image" src="{{result.cover}}" mode="aspectFit"></image>
+    </view>
+  </view>
+  
+  <!-- 错误提示 -->
+  <view class="error-wrapper" wx:if="{{error}}">
+    <view class="error-text">{{error}}</view>
+  </view>
+  
+  <!-- 使用说明 -->
+  <view class="help-section">
+    <view class="help-title">使用说明：</view>
+    <view class="help-content">
+      <text class="help-item">1. 复制抖音视频分享链接</text>
+      <text class="help-item">2. 粘贴到上方输入框中</text>
+      <text class="help-item">3. 点击"去水印"按钮</text>
+      <text class="help-item">4. 等待处理完成后下载</text>
+    </view>
+  </view>
+</view>

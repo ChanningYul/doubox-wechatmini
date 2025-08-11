@@ -1,0 +1,44 @@
+<view class="container">
+  <!-- 输入区域 -->
+  <view class="input-section">
+    <view class="input-label">请输入要复刻的IP内容：</view>
+    <textarea 
+      class="input-textarea" 
+      placeholder="请输入IP描述、特征或相关内容"
+      value="{{inputText}}"
+      bindinput="onInputChange"
+      maxlength="1000"
+      show-confirm-bar="{{false}}"
+    ></textarea>
+    <view class="char-count">{{inputText.length}}/1000</view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="button-section">
+    <button 
+      class="action-btn {{loading ? 'loading' : ''}}" 
+      disabled="{{loading || isButtonDisabled}}"
+      bindtap="generateIP"
+    >
+      {{loading ? '生成中...' : '开始复刻'}}
+    </button>
+  </view>
+
+  <!-- 结果展示区域 -->
+  <view class="result-section" wx:if="{{results.length > 0}}">
+    <view class="result-title">复刻结果：</view>
+    <view class="result-list">
+      <view class="result-item" wx:for="{{results}}" wx:key="index">
+        <view class="result-content">{{item}}</view>
+        <view class="result-actions">
+          <button class="copy-btn" bindtap="copyResult" data-index="{{index}}">复制</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-message" wx:if="{{error}}">
+    {{error}}
+  </view>
+</view>
