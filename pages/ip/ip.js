@@ -67,18 +67,56 @@ Page({
    * @param {string} text 输入文本
    */
   callIPAPI: function (text) {
-    // 注意：generateIP接口在新的API文档中暂未提供
-    // 暂时使用模拟数据
-    this.setData({
-      results: this.generateMockResults(text),
-      loading: false,
-      error: ''
-    });
+    console.log('开始调用IP复刻API:', text);
+    
+    API.generateIP(text)
+      .then((res) => {
+        console.log('API调用成功:', res);
+        
+        this.setData({
+          loading: false,
+          results: res.data.results || res.data.list || [],
+          error: ''
+        });
+        
+        wx.showToast({
+          title: 'IP复刻完成',
+          icon: 'success',
+          duration: 1500
+        });
+      })
+      .catch((err) => {
+        console.error('IP复刻失败:', err);
+        
+        // 显示详细错误信息给开发者
+        this.setData({
+          loading: false,
+          error: err.message || 'IP复刻失败'
+        });
+        
+        // 显示开发提示
+        wx.showModal({
+          title: '调试信息',
+          content: `API调用失败：${err.message}\n\n开发环境解决方案：\n1. 确保本地服务器已启动\n2. 在微信开发者工具中开启"不校验合法域名"\n3. 或使用模拟数据进行开发`,
+          confirmText: '使用模拟数据',
+          cancelText: '重试',
+          success: (res) => {
+            if (res.confirm) {
+              // 使用模拟数据
+              this.setData({
+                results: this.generateMockResults(text),
+                loading: false,
+                error: ''
+              });
 
-    wx.showToast({
-      title: 'IP复刻完成（模拟数据）',
-      icon: 'success'
-    });
+              wx.showToast({
+                title: '已切换到模拟数据',
+                icon: 'success'
+              });
+            }
+          }
+        });
+      });
   },
 
   /**
