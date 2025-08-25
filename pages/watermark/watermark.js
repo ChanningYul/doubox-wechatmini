@@ -100,8 +100,12 @@ Page({
    * @param {String} url 视频链接
    */
   callWatermarkAPI: function (url) {
+    console.log('开始调用去水印API:', url);
+    
     API.removeWatermark(url)
       .then((res) => {
+        console.log('API调用成功:', res);
+        
         this.setData({
           loading: false,
           result: res.data,
@@ -117,19 +121,34 @@ Page({
       .catch((err) => {
         console.error('视频去水印失败:', err);
         
-        // 如果API调用失败，使用模拟数据作为降级方案
-        const mockResult = this.generateMockResult();
-        
+        // 显示详细错误信息给开发者
         this.setData({
           loading: false,
-          result: mockResult,
-          error: ''
+          error: err.message || '处理失败'
         });
         
-        wx.showToast({
-          title: '处理完成（演示数据）',
-          icon: 'success',
-          duration: 1500
+        // 显示开发提示
+        wx.showModal({
+          title: '调试信息',
+          content: `API调用失败：${err.message}\n\n开发环境解决方案：\n1. 确保本地服务器已启动\n2. 在微信开发者工具中开启"不校验合法域名"\n3. 或使用模拟数据进行开发`,
+          confirmText: '使用模拟数据',
+          cancelText: '重试',
+          success: (res) => {
+            if (res.confirm) {
+              // 使用模拟数据
+              const mockResult = this.generateMockResult();
+              this.setData({
+                result: mockResult,
+                error: ''
+              });
+              
+              wx.showToast({
+                title: '已切换到模拟数据',
+                icon: 'success',
+                duration: 1500
+              });
+            }
+          }
         });
       });
   },

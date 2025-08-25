@@ -5,12 +5,14 @@
 
 // API基础配置
 const API_CONFIG = {
-  baseUrl: 'https://a.starrysplendor.com', // doubox服务器API地址
+  baseUrl: 'https://api.doubox.example.com', // 生产环境API地址
+  devBaseUrl: 'http://localhost:8000', // 开发环境API地址
   timeout: 10000, // 请求超时时间
-  apiKey: 'your_api_key_here', // API密钥，需要替换为真实的密钥
+  apiKey: '65c2e5a5-fdaa-4899-8b92-99ce148f112d', // API密钥，需要替换为真实的密钥
   header: {
     'Content-Type': 'application/json'
-  }
+  },
+  isDev: true // 开发模式标志，生产环境设为false
 };
 
 /**
@@ -28,8 +30,11 @@ const request = (options) => {
       });
     }
 
+    // 根据环境选择API地址
+    const currentBaseUrl = API_CONFIG.isDev ? API_CONFIG.devBaseUrl : API_CONFIG.baseUrl;
+
     wx.request({
-      url: options.fullUrl || `${API_CONFIG.baseUrl}${options.url}`,
+      url: options.fullUrl || `${currentBaseUrl}${options.url}`,
       method: options.method || 'GET',
       data: options.data || {},
       header: {
@@ -78,13 +83,26 @@ const request = (options) => {
           wx.hideLoading();
         }
 
-        // 网络错误
-        const errorMsg = '网络连接失败，请检查网络设置';
+        // 网络错误详细处理
+        let errorMsg = '网络连接失败';
+        
+        if (API_CONFIG.isDev && currentBaseUrl.startsWith('http://')) {
+          errorMsg = '开发环境网络错误：请检查本地服务器是否启动，或在微信开发者工具中开启"不校验合法域名"';
+        } else {
+          errorMsg = '网络连接失败，请检查网络设置或服务器状态';
+        }
+        
+        console.error('网络请求失败:', {
+          url: options.fullUrl || `${currentBaseUrl}${options.url}`,
+          error: err,
+          isDev: API_CONFIG.isDev
+        });
+        
         if (options.showError !== false) {
           wx.showToast({
             title: errorMsg,
             icon: 'none',
-            duration: 2000
+            duration: 3000
           });
         }
         reject(new Error(errorMsg));
@@ -191,10 +209,11 @@ const API = {
    * @returns {Promise} 处理结果
    */
   removeWatermark: (videoUrl) => {
+    const currentBaseUrl = API_CONFIG.isDev ? API_CONFIG.devBaseUrl : API_CONFIG.baseUrl;
     return post('', {}, {
       loadingText: '处理中...',
       showLoading: true,
-      fullUrl: `${API_CONFIG.baseUrl}/share2realurl?key=${API_CONFIG.apiKey}&share_text=${encodeURIComponent(videoUrl)}`
+      fullUrl: `${currentBaseUrl}/share2realurl?key=${API_CONFIG.apiKey}&share_text=${encodeURIComponent(videoUrl)}`
     });
   },
 
