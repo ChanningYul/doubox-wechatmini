@@ -23,45 +23,10 @@
     {{loading ? '处理中...' : '去水印'}}
   </button>
   
-  <!-- 结果展示区域 -->
-  <view class="result-wrapper" wx:if="{{result}}">
-    <view class="result-title">处理结果：</view>
-    
-    <!-- 视频信息 -->
-    <view class="video-info" wx:if="{{result.title}}">
-      <view class="info-item">
-        <text class="info-label">视频标题：</text>
-        <text class="info-value">{{result.title}}</text>
-      </view>
-      <view class="info-item" wx:if="{{result.author}}">
-        <text class="info-label">作者：</text>
-        <text class="info-value">{{result.author}}</text>
-      </view>
-      <view class="info-item" wx:if="{{result.duration}}">
-        <text class="info-label">时长：</text>
-        <text class="info-value">{{result.duration}}</text>
-      </view>
-    </view>
-    
-    <!-- 下载链接 -->
-    <view class="download-section" wx:if="{{result.downloadUrl}}">
-      <view class="download-title">无水印视频：</view>
-      <view class="download-actions">
-        <button class="btn-download" bindtap="downloadVideo">下载视频</button>
-        <button class="btn-copy" bindtap="copyDownloadUrl">复制链接</button>
-      </view>
-    </view>
-    
-    <!-- 预览图 -->
-    <view class="preview-section" wx:if="{{result.cover}}">
-      <view class="preview-title">视频封面：</view>
-      <image class="preview-image" src="{{result.cover}}" mode="aspectFit"></image>
-    </view>
-  </view>
-  
-  <!-- 错误提示 -->
-  <view class="error-wrapper" wx:if="{{error}}">
-    <view class="error-text">{{error}}</view>
+  <!-- 结果显示框 -->
+  <view class="result-box" wx:if="{{showResult && resultUrl}}">
+    <view class="result-tip">点击下方复制链接，粘贴到浏览器下载</view>
+    <view class="result-url" bindtap="copyResultUrl">{{resultUrl}}</view>
   </view>
   
   <!-- 使用说明 -->

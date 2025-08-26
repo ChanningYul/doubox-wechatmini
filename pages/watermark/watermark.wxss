@@ -72,50 +72,41 @@
   transform: none;
 }
 
-.result-wrapper {
+/* 结果显示框样式 */
+.result-box {
   background: #fff;
   border-radius: 16rpx;
   padding: 32rpx;
-  margin-top: 32rpx;
+  margin: 32rpx 0;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 2rpx solid #f0f0f0;
+  animation: fadeInUp 0.5s ease-out;
 }
 
-.result-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
+.result-tip {
+  font-size: 26rpx;
+  color: #666;
+  text-align: center;
   margin-bottom: 24rpx;
+  line-height: 1.5;
 }
 
-.video-info {
+.result-url {
   background: #f8f9fa;
   border-radius: 12rpx;
   padding: 24rpx;
-  margin-bottom: 24rpx;
-}
-
-.info-item {
-  display: flex;
-  margin-bottom: 16rpx;
-  align-items: flex-start;
-}
-
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
-.info-label {
-  font-size: 24rpx;
-  color: #666;
-  min-width: 120rpx;
-  font-weight: 500;
-}
-
-.info-value {
   font-size: 24rpx;
   color: #333;
-  flex: 1;
+  line-height: 1.6;
   word-break: break-all;
+  border: 2rpx solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.result-url:active {
+  background: #e9ecef;
+  border-color: #4FC3F7;
+  transform: scale(0.98);
 }
 
 .download-section {

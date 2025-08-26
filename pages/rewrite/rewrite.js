@@ -88,9 +88,16 @@ Page({
       .then((res) => {
         console.log('API调用成功:', res);
         
+        // 根据API接口文档，成功响应格式为 { "text": "仿写文案内容" }
+        const rewrittenText = res.text || '仿写完成，但未获取到内容';
+        
+        // 将单个仿写结果转换为数组格式以保持界面一致性
+        // 如果需要多个版本，可以多次调用API或在后端实现批量生成
+        const results = [rewrittenText];
+        
         this.setData({
           loading: false,
-          results: res.data.results || res.data.list || [],
+          results: results,
           error: ''
         });
         
@@ -103,16 +110,29 @@ Page({
       .catch((err) => {
         console.error('文案仿写失败:', err);
         
-        // 显示详细错误信息给开发者
+        // 根据错误类型提供更具体的错误信息
+        let errorMessage = err.message || '仿写失败';
+        let developmentTips = '';
+        
+        if (errorMessage.includes('密钥无效')) {
+          developmentTips = '请检查 utils/api.js 中的 apiKey 配置';
+        } else if (errorMessage.includes('今日免费使用次数已用完')) {
+          developmentTips = '可以申请新的API密钥或等待明日重置';
+        } else if (errorMessage.includes('网络')) {
+          developmentTips = '请检查网络连接和AI服务状态';
+        } else {
+          developmentTips = '请检查输入文案格式或稍后重试';
+        }
+        
         this.setData({
           loading: false,
-          error: err.message || '仿写失败'
+          error: errorMessage
         });
         
         // 显示开发提示
         wx.showModal({
-          title: '调试信息',
-          content: `API调用失败：${err.message}\n\n开发环境解决方案：\n1. 确保本地服务器已启动\n2. 在微信开发者工具中开启"不校验合法域名"\n3. 或使用模拟数据进行开发`,
+          title: '仿写失败',
+          content: `错误原因：${errorMessage}\n\n解决建议：${developmentTips}\n\n开发环境提示：\n1. 确保本地服务器已启动\n2. 在微信开发者工具中开启"不校验合法域名"\n3. 或使用模拟数据进行开发`,
           confirmText: '使用模拟数据',
           cancelText: '重试',
           success: (res) => {

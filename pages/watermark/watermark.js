@@ -13,7 +13,9 @@ Page({
     result: null, // 处理结果
     loading: false, // 加载状态
     error: '', // 错误信息
-    isButtonDisabled: true // 按钮是否禁用
+    isButtonDisabled: true, // 按钮是否禁用
+    showResult: false, // 是否显示结果框
+    resultUrl: '' // 结果URL
   },
 
   /**
@@ -41,7 +43,9 @@ Page({
     this.setData({
       videoUrl: value,
       error: '', // 清除错误信息
-      isButtonDisabled: !value.trim() // 根据输入内容更新按钮状态
+      isButtonDisabled: !value.trim(), // 根据输入内容更新按钮状态
+      showResult: false, // 隐藏结果框
+      resultUrl: '' // 清空结果URL
     });
   },
 
@@ -106,9 +110,17 @@ Page({
       .then((res) => {
         console.log('API调用成功:', res);
         
+        // 根据API接口文档，成功响应格式为 { "text": "视频真实下载URL" }
+        const realVideoUrl = res.text;
+        
+        if (!realVideoUrl) {
+          throw new Error('未获取到有效的视频下载地址');
+        }
+        
         this.setData({
           loading: false,
-          result: res.data,
+          showResult: true,
+          resultUrl: realVideoUrl,
           error: ''
         });
         
@@ -121,34 +133,18 @@ Page({
       .catch((err) => {
         console.error('视频去水印失败:', err);
         
-        // 显示详细错误信息给开发者
         this.setData({
           loading: false,
-          error: err.message || '处理失败'
+          showResult: false,
+          resultUrl: '',
+          error: ''
         });
         
-        // 显示开发提示
-        wx.showModal({
-          title: '调试信息',
-          content: `API调用失败：${err.message}\n\n开发环境解决方案：\n1. 确保本地服务器已启动\n2. 在微信开发者工具中开启"不校验合法域名"\n3. 或使用模拟数据进行开发`,
-          confirmText: '使用模拟数据',
-          cancelText: '重试',
-          success: (res) => {
-            if (res.confirm) {
-              // 使用模拟数据
-              const mockResult = this.generateMockResult();
-              this.setData({
-                result: mockResult,
-                error: ''
-              });
-              
-              wx.showToast({
-                title: '已切换到模拟数据',
-                icon: 'success',
-                duration: 1500
-              });
-            }
-          }
+        // 显示失败toast
+        wx.showToast({
+          title: '提取失败，请稍后尝试！',
+          icon: 'none',
+          duration: 2000
         });
       });
   },
@@ -248,6 +244,38 @@ Page({
       }
     });
     */
+  },
+
+  /**
+   * 复制结果URL到剪贴板
+   */
+  copyResultUrl: function () {
+    const { resultUrl } = this.data;
+    
+    if (!resultUrl) {
+      wx.showToast({
+        title: '没有可复制的链接',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.setClipboardData({
+      data: resultUrl,
+      success: () => {
+        wx.showToast({
+          title: '已复制',
+          icon: 'success',
+          duration: 1500
+        });
+      },
+      fail: () => {
+        wx.showToast({
+          title: '复制失败',
+          icon: 'none'
+        });
+      }
+    });
   },
 
   /**

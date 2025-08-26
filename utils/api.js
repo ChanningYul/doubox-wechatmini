@@ -5,14 +5,15 @@
 
 // API基础配置
 const API_CONFIG = {
-  baseUrl: 'https://api.doubox.example.com', // 生产环境API地址
+  baseUrl: 'https://a.starrysplendor.com', // 生产环境API地址
   devBaseUrl: 'http://localhost:8000', // 开发环境API地址
-  timeout: 10000, // 请求超时时间
-  apiKey: '28fcabac-09b1-4ccd-b806-c15fc5a1ede3', // API密钥，需要替换为真实的密钥
+  timeout: 180000, // 请求超时时间
+  apiKey: 'd73e1a33-2a92-4812-a5a8-195e307d44f2', // API密钥，需要替换为真实的密钥
   header: {
     'Content-Type': 'application/json'
   },
-  isDev: true // 开发模式标志，生产环境设为false
+  isDev: false, // 开发模式标志，生产环境设为false
+  useMockData: false
 };
 
 /**
@@ -48,25 +49,54 @@ const request = (options) => {
           wx.hideLoading();
         }
 
-        // 处理响应数据
+        // 处理响应数据 - 根据API接口文档更新处理逻辑
         if (res.statusCode === 200) {
-          if (res.data.code === 0 || res.data.success) {
-            resolve(res.data);
-          } else {
-            // 业务错误
-            const errorMsg = res.data.message || res.data.msg || '请求失败';
-            if (options.showError !== false) {
-              wx.showToast({
-                title: errorMsg,
-                icon: 'none',
-                duration: 2000
-              });
-            }
-            reject(new Error(errorMsg));
+          // 根据新的API接口文档，成功响应直接返回数据对象
+          resolve(res.data);
+        } else if (res.statusCode === 400) {
+          // 400错误：请求参数错误或业务逻辑错误
+          const errorMsg = res.data?.detail || '请求参数错误';
+          if (options.showError !== false) {
+            wx.showToast({
+              title: errorMsg,
+              icon: 'none',
+              duration: 2000
+            });
           }
+          reject(new Error(errorMsg));
+        } else if (res.statusCode === 401) {
+          // 401错误：密钥无效或配额用完
+          const errorMsg = res.data?.detail || '密钥无效';
+          let userFriendlyMsg = errorMsg;
+          
+          if (errorMsg === 'Invalid key') {
+            userFriendlyMsg = 'API密钥无效，请检查配置';
+          } else if (errorMsg === 'out') {
+            userFriendlyMsg = '今日免费使用次数已用完';
+          }
+          
+          if (options.showError !== false) {
+            wx.showToast({
+              title: userFriendlyMsg,
+              icon: 'none',
+              duration: 2000
+            });
+          }
+          reject(new Error(userFriendlyMsg));
+        } else if (res.statusCode === 500) {
+          // 500错误：服务器内部错误
+          const errorMsg = res.data?.detail || '服务器内部错误';
+          if (options.showError !== false) {
+            wx.showToast({
+              title: errorMsg,
+              icon: 'none',
+              duration: 2000
+            });
+          }
+          reject(new Error(errorMsg));
         } else {
-          // HTTP错误
-          const errorMsg = `请求失败 (${res.statusCode})`;
+          // 其他HTTP错误
+          const errorMsg = res.data?.detail || `请求失败 (${res.statusCode})`;
           if (options.showError !== false) {
             wx.showToast({
               title: errorMsg,
@@ -86,17 +116,39 @@ const request = (options) => {
         // 网络错误详细处理
         let errorMsg = '网络连接失败';
         
-        if (API_CONFIG.isDev && currentBaseUrl.startsWith('http://')) {
+        // 详细的错误信息记录
+        const errorDetails = {
+          url: options.fullUrl || `${currentBaseUrl}${options.url}`,
+          method: options.method || 'GET',
+          data: options.data,
+          error: err,
+          errorType: err.errMsg || 'unknown',
+          isDev: API_CONFIG.isDev,
+          currentBaseUrl: currentBaseUrl
+        };
+        
+        console.error('详细网络请求失败信息:', errorDetails);
+        
+        // 根据具体错误类型提供不同的解决方案
+        if (err.errMsg) {
+          if (err.errMsg.includes('timeout')) {
+            errorMsg = '请求超时，请检查网络连接或服务器响应时间';
+          } else if (err.errMsg.includes('fail')) {
+            if (API_CONFIG.isDev && currentBaseUrl.startsWith('http://')) {
+              errorMsg = 'HTTP请求被拦截：请确认已开启"不校验合法域名"选项';
+            } else {
+              errorMsg = '请求失败：请检查服务器地址和网络连接';
+            }
+          } else if (err.errMsg.includes('ssl')) {
+            errorMsg = 'SSL证书错误：请检查HTTPS配置';
+          } else {
+            errorMsg = `网络错误：${err.errMsg}`;
+          }
+        } else if (API_CONFIG.isDev && currentBaseUrl.startsWith('http://')) {
           errorMsg = '开发环境网络错误：请检查本地服务器是否启动，或在微信开发者工具中开启"不校验合法域名"';
         } else {
           errorMsg = '网络连接失败，请检查网络设置或服务器状态';
         }
-        
-        console.error('网络请求失败:', {
-          url: options.fullUrl || `${currentBaseUrl}${options.url}`,
-          error: err,
-          isDev: API_CONFIG.isDev
-        });
         
         if (options.showError !== false) {
           wx.showToast({
@@ -187,8 +239,7 @@ const API = {
       key: API_CONFIG.apiKey,
       url: videoUrl
     }, {
-      loadingText: '提取中...',
-      showLoading: true
+      showLoading: false
     });
   },
 
@@ -202,8 +253,7 @@ const API = {
       key: API_CONFIG.apiKey,
       text: originalText
     }, {
-      loadingText: '仿写中...',
-      showLoading: true
+      showLoading: false
     });
   },
 
@@ -217,8 +267,7 @@ const API = {
       key: API_CONFIG.apiKey,
       share_text: videoUrl
     }, {
-      loadingText: '处理中...',
-      showLoading: true
+      showLoading: false
     });
   },
 
@@ -232,8 +281,7 @@ const API = {
       key: API_CONFIG.apiKey,
       text: inputText
     }, {
-      loadingText: '生成中...',
-      showLoading: true
+      showLoading: false
     });
   }
 

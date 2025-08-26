@@ -1,0 +1,529 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "FastAPI",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Root",
+                "operationId": "root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getremainder": {
+            "get": {
+                "summary": "Getremainder",
+                "description": "查询key的剩余可使用次数\n\n:param key: 密钥\n\n:return: 剩余次数",
+                "operationId": "getremainder_getremainder_get",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/realvideo2text": {
+            "post": {
+                "summary": "Realvideo2Text",
+                "description": "从视频真实下载地址提取文本\n\n:param request_data: 请求数据，包含密钥和视频真实下载地址\n\n:return: 提取的文本，内含有换行符",
+                "operationId": "realvideo2text_realvideo2text_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RealVideo2TextRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/video2text": {
+            "post": {
+                "summary": "从抖音视频提取文本",
+                "description": "从抖音视频分享链接中提取语音转文字内容。\n    \n    **功能说明：**\n    - 支持抖音短视频分享链接解析\n    - 自动获取视频真实下载地址\n    - 将视频中的语音转换为文字\n    - 视频时长限制：不超过612秒\n    \n    **使用限制：**\n    - 需要有效的API密钥\n    - 每个密钥每日有免费使用次数限制\n    - 视频时长不能超过10分钟\n    \n    **返回格式：**\n    - 提取的文本内容包含换行符\n    - 按语音识别的句子结构组织",
+                "operationId": "video2text_video2text_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Video2TextRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "成功提取视频文本",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Video2TextResponse"
+                                },
+                                "example": {
+                                    "text": "这是从视频中提取的文本内容\n包含换行符的完整文案"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误或视频时长超过限制",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "视频时长超过系统负载上限"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "密钥无效或今日免费次数已用完",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "invalid_key": {
+                                        "value": {
+                                            "detail": "Invalid key"
+                                        }
+                                    },
+                                    "quota_exceeded": {
+                                        "value": {
+                                            "detail": "out"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误，文本提取失败",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "提取文案失败"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/share2realurl": {
+            "post": {
+                "summary": "解析抖音分享链接获取真实视频URL",
+                "description": "将抖音视频分享链接解析为可直接下载的真实视频URL。\n    \n    **功能说明：**\n    - 支持抖音短视频分享链接\n    - 自动解析重定向链接\n    - 返回视频的直接下载地址\n    \n    **支持的链接格式：**\n    - 抖音APP分享的短链接\n    - 包含跳转的分享文本\n    \n    **使用限制：**\n    - 需要有效的API密钥\n    - 每次调用会消耗使用次数",
+                "operationId": "share2realurl_share2realurl_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Share2RealUrlRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "成功解析分享链接",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Share2RealUrlResponse"
+                                },
+                                "example": {
+                                    "text": "https://v.douyin.com/example/video.mp4"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "密钥无效",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "Invalid key"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "解析分享链接失败",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "解析分享链接失败"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/imitatetext": {
+            "post": {
+                "summary": "AI文案仿写",
+                "description": "基于提供的原文案，使用AI生成风格相似的仿写内容。\n    \n    **功能说明：**\n    - 使用通义千问AI模型进行文案仿写\n    - 保持原文案的风格和语调\n    - 生成新颖且相关的内容\n    \n    **适用场景：**\n    - 营销文案创作\n    - 内容创意扩展\n    - 文案风格学习\n    \n    **使用限制：**\n    - 需要有效的API密钥\n    - 依赖阿里云百炼AI服务\n    - 每次调用会消耗使用次数",
+                "operationId": "imitatetext_imitatetext_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ImitateTextRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "成功生成仿写文案",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImitateTextResponse"
+                                },
+                                "example": {
+                                    "text": "这是根据原文案风格生成的仿写内容，保持了相似的表达方式和语调。"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "密钥无效",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "Invalid key"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "仿写文案失败",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "detail": "仿写文案失败"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "post": {
+                "summary": "Ping",
+                "description": "简单的ping接口，用于测试服务状态\n\n:param req: 请求对象\n\n:return: 成功响应",
+                "operationId": "ping_ping_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ErrorResponse": {
+                "properties": {
+                    "detail": {
+                        "type": "string",
+                        "title": "Detail",
+                        "description": "错误详细信息"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "detail"
+                ],
+                "title": "ErrorResponse"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ImitateTextRequest": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "密钥"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "description": "文案"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "text"
+                ],
+                "title": "ImitateTextRequest"
+            },
+            "ImitateTextResponse": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "description": "根据原文案生成的仿写文案"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "ImitateTextResponse"
+            },
+            "RealVideo2TextRequest": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "密钥"
+                    },
+                    "url": {
+                        "type": "string",
+                        "title": "Url",
+                        "description": "抖音视频真实下载地址"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "url"
+                ],
+                "title": "RealVideo2TextRequest"
+            },
+            "Share2RealUrlRequest": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "密钥"
+                    },
+                    "share_text": {
+                        "type": "string",
+                        "title": "Share Text",
+                        "description": "抖音的视频分享链接"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "share_text"
+                ],
+                "title": "Share2RealUrlRequest"
+            },
+            "Share2RealUrlResponse": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "description": "视频的真实下载url"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "Share2RealUrlResponse"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "Video2TextRequest": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "密钥"
+                    },
+                    "url": {
+                        "type": "string",
+                        "title": "Url",
+                        "description": "抖音视频分享url"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "url"
+                ],
+                "title": "Video2TextRequest"
+            },
+            "Video2TextResponse": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "description": "从视频中提取的文本内容，包含换行符"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "Video2TextResponse"
+            }
+        }
+    }
+}
